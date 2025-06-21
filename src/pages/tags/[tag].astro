@@ -28,7 +28,7 @@ export async function getStaticPaths() {
 ---
 
 <BaseLayout
-  title={`タグ: ${tag} | あさおとみどり`}
+  title={`タグ: ${tag} | 古今医術研究所`}
   description={`${tag} に関連する観察記事一覧`}
   image="/ogp.png"
   url={`https://isuku.jp/tags/${encodeURIComponent(tag)}`}
@@ -56,7 +56,7 @@ export async function getStaticPaths() {
                 desc={data.description}
                 img={img}
                 url={`/articles/${slug}`}
-                badge="あさおとみどり"
+                badge="古今医術研究所"
                 tags={data.tags}
                 pubDate={data.pubDate}
               />
