@@ -1,0 +1,52 @@
+---
+import '../styles/global.css';
+
+export interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  ogType?: string;
+  url?: string;
+}
+
+const {
+  title,
+  description,
+  image = '/ogp.png', // ✅ 使用中のOGP画像に合わせてパス統一
+  ogType = 'website',
+  url = 'https://clchair.netlify.app' // ✅ 本番用URLを明示（安全な絶対URL）
+} = Astro.props;
+
+// OGP画像URL組み立て（安全な fallback を含める）
+let ogImage = '';
+try {
+  ogImage = new URL(image, url).href;
+} catch (e) {
+  ogImage = image; // fallback: 相対パスのまま使う
+}
+---
+
+<!-- Global Metadata -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<meta name="generator" content={Astro.generator} />
+
+<!-- Primary Meta Tags -->
+<title>{title}</title>
+<meta name="title" content={title} />
+<meta name="description" content={description} />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content={ogType} />
+<meta property="og:url" content={url} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={ogImage} />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content={url} />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />

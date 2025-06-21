@@ -1,0 +1,87 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import HorizontalCard from "../../components/HorizontalCard.astro";
+import { getCollection } from "astro:content";
+
+// 記事コレクションを取得し、投稿日で新しい順にソート
+const articles = (await getCollection("articles")).sort(
+  (a, b) => new Date(b.data.pubDate).valueOf() - new Date(a.data.pubDate).valueOf()
+);
+
+// 各記事フォルダの 001.(jpg|jpeg|png) を自動でインポート
+const thumbs = import.meta.glob(
+  "../../content/articles/*/001.{jpg,jpeg,png}",
+  { eager: true, import: "default" }
+);
+
+// slug → image metadata の辞書を作成（例: '20250617' => 画像）
+const thumbBySlug = Object.fromEntries(
+  Object.entries(thumbs).map(([path, mod]) => [
+    path.split("/").at(-2), // パス末尾のフォルダ名（= slug）
+    mod
+  ])
+);
+---
+
+<script type="module">
+  const $ = (s) => document.querySelectorAll(s);
+  document.getElementById("search")?.addEventListener("input", (e) => {
+    const kw = e.target.value.toLowerCase();
+    $(".article-card").forEach((c) =>
+      c.style.display = c.innerText.toLowerCase().includes(kw) ? "block" : "none"
+    );
+  });
+</script>
+
+<BaseLayout
+  title="clchair | 記事一覧"
+  description="漢方・服薬相談・食事・運動など、くらしにまつわる記事の一覧です。"
+  image="/ogp.png"
+  url="https://clchair.netlify.app/articles"
+  sideBarActiveItemID="articles"
+>
+  <section class="max-w-4xl mx-auto px-6 py-12">
+    <h1 class="text-4xl font-bold mb-6">🗂 記事一覧</h1>
+
+    <div class="mb-8">
+      <input
+        id="search"
+        type="text"
+        placeholder="🔍 キーワードで検索（例：運動、食事）"
+        class="input input-bordered w-full"
+      />
+    </div>
+
+    {articles.length === 0 ? (
+      <p class="text-gray-500 dark:text-gray-400">記事がまだありません。</p>
+    ) : (
+      <div class="space-y-6">
+        {articles.map(({ slug, data }) => {
+          let img = data.image;
+
+          // Frontmatterの画像が相対パス（./img.jpgなど）ならサムネイルと置換
+          if (typeof img === "string" && !img.startsWith("/") && !img.startsWith("http")) {
+            img = thumbBySlug[slug] ?? img;
+          }
+
+          // Frontmatterになければ、slugから自動取得（001.jpg）
+          if (!img) img = thumbBySlug[slug];
+
+          return (
+            <div class="article-card">
+              <HorizontalCard
+                title={data.title}
+                desc={data.description}
+                img={img}
+                url={`/articles/${slug}`}
+                badge="クリーンチェア"
+                tags={data.tags}
+                pubDate={data.pubDate}
+              />
+            </div>
+          );
+        })}
+      </div>
+    )}
+  </section>
+</BaseLayout>

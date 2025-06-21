@@ -1,0 +1,42 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const articles = await getCollection("articles");
+
+// タグ出現回数カウント
+const tagMap = new Map<string, number>();
+for (const a of articles) {
+  a.data.tags?.forEach((t) => tagMap.set(t, (tagMap.get(t) || 0) + 1));
+}
+const sortedTags = [...tagMap.entries()].sort((a, b) =>
+  a[0].localeCompare(b[0], "ja")
+);
+---
+
+<BaseLayout
+  title="タグ一覧 | クリーンチェア"
+  description="クリーンチェアに登場するすべてのタグ一覧ページ"
+  image="/ogp.png"
+  url="https://isuku.jp/tags"
+  sideBarActiveItemID="articles"
+>
+  <section class="max-w-4xl mx-auto px-6 py-12">
+    <h1 class="text-3xl font-bold mb-8">🏷 タグ一覧</h1>
+
+    {sortedTags.length === 0 ? (
+      <p class="text-gray-500 dark:text-gray-400">まだタグが登録されていません。</p>
+    ) : (
+      <ul class="flex flex-wrap gap-3">
+        {sortedTags.map(([tag, count]) => (
+          <li>
+            {/* 日本語タグも安全に遷移できるよう encode */}
+            <a href={`/tags/${encodeURIComponent(tag)}`} class="badge badge-outline text-base">
+              {tag}（{count}）
+            </a>
+          </li>
+        ))}
+      </ul>
+    )}
+  </section>
+</BaseLayout>
