@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ===== 古今医術研究所: グローバルスタイル ===== */
+/* ===== 浅夢紫月: グローバルスタイル ===== */
 
 body {
   @apply font-sans bg-primary-light text-gray-800;
